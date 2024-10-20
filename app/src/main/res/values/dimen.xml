@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="time_unit_extra_content_height">310dp</dimen> <!-- 设置你想要的高度 -->
+    <dimen name="repeat_time_unit_height">150dp</dimen>
+</resources>
