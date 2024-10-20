@@ -22,6 +22,5 @@ Windows 11.0<br>
 GC: G1 Young Generation, G1 Old Generation<br>
 Memory: 4054M<br>
 Cores: 16<br>
-Registry:<br>
-  ide.experimental.ui=true<br>
+Registry:ide.experimental.ui=true<br>
 
