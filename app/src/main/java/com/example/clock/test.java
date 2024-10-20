@@ -3,15 +3,14 @@ package com.example.clock;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -22,10 +21,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+/**
+ * 对应页面activity_test
+ */
 public class test extends AppCompatActivity {
 
     Toolbar toolbar;
@@ -61,9 +62,12 @@ public class test extends AppCompatActivity {
     class myButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-
+            Intent intent = new Intent();
+            intent.setClass(test.this, ClockInfo.class);
+            startActivity(intent);
         }
     }
+    //点击clockunit时的触发器
     class clockUnitListener implements View.OnClickListener{
         @Override
         public void onClick(View view) {
@@ -91,17 +95,16 @@ public class test extends AppCompatActivity {
             isExpanded = !isExpanded;
         }
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
-
+    //clockunit展开时的动画
     private void expand(LinearLayout clockUnit, FrameLayout fragmentContainer) {
         int startHeight = 0;
-        int endHeight = (int) getResources().getDimension(R.dimen.extra_content_height); // 设置你额外内容的高度
+        int endHeight = (int) getResources().getDimension(R.dimen.time_unit_extra_content_height); // 设置你额外内容的高度
 
         ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
         animator.addUpdateListener(animation -> {
@@ -113,9 +116,9 @@ public class test extends AppCompatActivity {
         animator.setDuration(300); // 动画持续时间
         animator.start();
     }
-
+    //clockunit收起时的动画
     private void collapse(LinearLayout clockUnit, FrameLayout fragmentContainer) {
-        int startHeight = (int) getResources().getDimension(R.dimen.extra_content_height);
+        int startHeight = (int) getResources().getDimension(R.dimen.time_unit_extra_content_height);
         int endHeight = 0;
 
         ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
