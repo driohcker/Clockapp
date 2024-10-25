@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clockUnit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/rounded_background"
+    android:padding="10dp">
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/time"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:paddingLeft="5dp"
+                    android:text="7:40"
+                    android:textSize="40sp" />
+
+                <TextView
+                    android:id="@+id/time_wide"
+                    android:layout_width="100dp"
+                    android:layout_height="36dp"
+                    android:text="上午"
+                    android:textSize="24sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/times"
+                    android:layout_width="60dp"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="7dp"
+                    android:text="每天"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/time_remains"
+                    android:layout_width="220dp"
+                    android:layout_height="match_parent"
+                    android:text="3小时40分钟16秒后响铃"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Switch
+            android:layout_width="55dp"
+            android:layout_height="match_parent"
+            android:scaleX="1.25"
+            android:scaleY="1.25"
+            android:translationX="-10dp"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+</LinearLayout>
