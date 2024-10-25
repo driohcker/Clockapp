@@ -1,4 +1,4 @@
-package com.example.clock;
+package com.example.clock.MainActivity_pack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -7,11 +7,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.activity.EdgeToEdge;
@@ -22,29 +25,37 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.clock.ClockInfo_pack.ClockInfo;
+import com.example.clock.R;
+import com.example.clock.Settings.Settings;
+import com.example.clock.Sql.ClockDatabaseHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 /**
  * 对应页面activity_test
  */
-public class test extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
     MenuInflater inflater;
     FloatingActionButton addClock;
     LinearLayout clockUnit;
     private boolean isExpanded = false;
+    ClockDatabaseHelper clockDatabaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_test);
+        setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        //创建数据库
+        //clockDatabaseHelper = new ClockDatabaseHelper(this);
 
         toolbar = findViewById(R.id.toolbar);
         addClock = findViewById(R.id.fab);
@@ -63,7 +74,7 @@ public class test extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             Intent intent = new Intent();
-            intent.setClass(test.this, ClockInfo.class);
+            intent.setClass(MainActivity.this, ClockInfo.class);
             startActivity(intent);
         }
     }
@@ -94,12 +105,6 @@ public class test extends AppCompatActivity {
             }
             isExpanded = !isExpanded;
         }
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return true;
     }
     //clockunit展开时的动画
     private void expand(LinearLayout clockUnit, FrameLayout fragmentContainer) {
@@ -136,5 +141,22 @@ public class test extends AppCompatActivity {
             }
         });
         animator.start();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        menu.findItem(R.id.action_settings).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem menuItem) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, Settings.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+
+        return true;
     }
 }

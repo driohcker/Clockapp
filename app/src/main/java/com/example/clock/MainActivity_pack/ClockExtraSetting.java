@@ -1,4 +1,4 @@
-package com.example.clock;
+package com.example.clock.MainActivity_pack;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,9 @@ import android.widget.NumberPicker;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.clock.ClockInfo_pack.ClockInfo;
+import com.example.clock.R;
 
 import java.lang.reflect.Field;
 

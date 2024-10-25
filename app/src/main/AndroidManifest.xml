@@ -13,14 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Clock"
         tools:targetApi="31">
+        <activity android:name=".ClockInfo_pack.ClockInfo" />
+        <activity android:name=".Settings.Settings" />
         <activity
-            android:name=".RepeatTimeUnitSetting"
-            android:exported="false" />
-        <activity
-            android:name=".ClockInfo"
-            android:exported="false" />
-        <activity
-            android:name=".test"
+            android:name=".MainActivity_pack.test"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

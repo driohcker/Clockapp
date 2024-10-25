@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ClockInfo">
+    tools:context=".ClockInfo_pack.ClockInfo"
+    android:background="#F4F4F4">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#F4F4F4">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/linearLayout"
@@ -23,7 +23,7 @@
             tools:layout_editor_absoluteX="1dp">
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -61,7 +61,7 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/button3"
+                android:id="@+id/confirm"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -202,4 +202,4 @@
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

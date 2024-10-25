@@ -1,11 +1,13 @@
-package com.example.clock;
+package com.example.clock.ClockInfo_pack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -19,6 +21,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.clock.R;
+
 import java.lang.reflect.Field;
 
 /**
@@ -28,6 +32,7 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
 
     NumberPicker time_widePicker,hourPicker,minutePicker;
     LinearLayout repeat_time_unit;
+    Button confirm,cancel;
     private boolean isExpanded = false;
 
     @Override
@@ -46,6 +51,8 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
         hourPicker = findViewById(R.id.hourPicker);
         minutePicker = findViewById(R.id.minutePicker);
         repeat_time_unit = findViewById(R.id.repeat_time_unit);
+        confirm = findViewById(R.id.confirm);
+        cancel = findViewById(R.id.cancel);
 
         // 定义stringpicker要显示的文字
         String[] values = {"上午", "下午"};
@@ -71,6 +78,8 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
         hourPicker.setOnValueChangedListener(this);
         minutePicker.setOnValueChangedListener(this);
         repeat_time_unit.setOnClickListener(new repeat_time_OnClickListener());
+        confirm.setOnClickListener(new confirmOnClickListener());
+        cancel.setOnClickListener(new cancelOnClickListener());
     }
 
     // 禁用 NumberPicker 内部的 EditText
@@ -133,6 +142,22 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
                 }
             }
             isExpanded = !isExpanded;
+        }
+    }
+    class confirmOnClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            intent.putExtra("addClockUnit", true); // 可以根据需要传递其他数据
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    }
+    class cancelOnClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent();
+            finish();
         }
     }
     //repeat_time_unit展开时的动画

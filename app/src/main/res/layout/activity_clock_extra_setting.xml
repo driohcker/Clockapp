@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_margin="10dp"
-            tools:context=".test">
+            tools:context=".MainActivity_pack.test">
 
             <NumberPicker
                 android:id="@+id/time_widePicker"
