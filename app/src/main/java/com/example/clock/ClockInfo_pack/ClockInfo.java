@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,6 +23,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.clock.R;
+import com.example.clock.entity.ClockUnitView;
+import com.example.clock.entity.myClock;
 
 import java.lang.reflect.Field;
 
@@ -33,13 +36,22 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
     NumberPicker time_widePicker,hourPicker,minutePicker;
     LinearLayout repeat_time_unit;
     Button confirm,cancel;
+    myClock myclock;
+
     private boolean isExpanded = false;
+    int hour, minute, time_wide;
+    String info;
+
+    int view_from;
+    // 定义stringpicker要显示的文字
+    String[] values = {"上午", "下午"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_clock_info);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -53,9 +65,6 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
         repeat_time_unit = findViewById(R.id.repeat_time_unit);
         confirm = findViewById(R.id.confirm);
         cancel = findViewById(R.id.cancel);
-
-        // 定义stringpicker要显示的文字
-        String[] values = {"上午", "下午"};
 
         // 设置最小和最大值，数组的索引
         time_widePicker.setMinValue(0);
@@ -80,25 +89,40 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
         repeat_time_unit.setOnClickListener(new repeat_time_OnClickListener());
         confirm.setOnClickListener(new confirmOnClickListener());
         cancel.setOnClickListener(new cancelOnClickListener());
+
+        checkViewFrom();
     }
 
-    // 禁用 NumberPicker 内部的 EditText
-    private void disableEditText(NumberPicker picker) {
-        try {
-            Field[] pickerFields = NumberPicker.class.getDeclaredFields();
-            for (Field field : pickerFields) {
-                if (field.getType().equals(EditText.class)) {
-                    field.setAccessible(true);
-                    EditText editText = (EditText) field.get(picker);
-                    if (editText != null) {
-                        editText.setFocusable(false);      // 禁用焦点
-                        editText.setFocusableInTouchMode(false); // 禁用触摸时的焦点
-                        //editText.setEnabled(false);        // 禁用编辑功能
-                    }
-                }
+    private void checkViewFrom(){
+        // 检查 Intent 中的 "view" 参数是否存在
+        String viewFrom = getIntent().getStringExtra("viewfrom");
+        if (viewFrom == null) {
+            Log.e("ClockInfo", "viewfrom参数为null");
+        } else {
+            Log.d("ClockInfo", "viewfrom参数的值为: " + viewFrom);
+        }
+
+        // 通过 "view" 的值判断，并添加 null 检查以避免异常
+        if ("ClockUnitView".equals(viewFrom)) {  // 使用字符串常量在前，避免空指针异常
+            myclock = (myClock) getIntent().getSerializableExtra("myClock");
+
+            if (myclock != null) {
+                Log.e("ClockInfo", "已接收到 myClock 对象");
+
+                // 初始化控件值
+                time_widePicker.setValue(myclock.getTimeWide().equals(values[0]) ? 0 : 1);
+                hourPicker.setValue(myclock.getTimeHour());
+                minutePicker.setValue(myclock.getTimeMinute());
+
+                // 初始化值
+                time_wide = time_widePicker.getValue();
+                hour = hourPicker.getValue();
+                minute = minutePicker.getValue();
+            } else {
+                Log.e("ClockInfo", "myClock对象为null，未能正确接收");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
+            Log.e("ClockInfo", "view参数值不为 'ClockUnitView'，未能进行myClock初始化");
         }
     }
 
@@ -107,15 +131,17 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
     public void onValueChange(NumberPicker numberPicker, int i, int i1) {
         if(numberPicker.getId() == R.id.time_widePicker){
             //被触发传入值
+            time_wide = time_widePicker.getValue();
         }
         if(numberPicker.getId() == R.id.hourPicker){
             //被触发传入值
+            hour = hourPicker.getValue();
         }
         if(numberPicker.getId() == R.id.minutePicker){
             //被触发传入值
+            minute = minutePicker.getValue();
         }
     }
-
     //repeat_time_unit触发器
     class repeat_time_OnClickListener implements View.OnClickListener {
         @Override
@@ -144,6 +170,7 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
             isExpanded = !isExpanded;
         }
     }
+    //确定按钮触发
     class confirmOnClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view) {
@@ -153,6 +180,7 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
             finish();
         }
     }
+    //取消按钮触发
     class cancelOnClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view) {
@@ -195,5 +223,24 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
             }
         });
         animator.start();
+    }
+    // 禁用 NumberPicker 内部的 EditText
+    private void disableEditText(NumberPicker picker) {
+        try {
+            Field[] pickerFields = NumberPicker.class.getDeclaredFields();
+            for (Field field : pickerFields) {
+                if (field.getType().equals(EditText.class)) {
+                    field.setAccessible(true);
+                    EditText editText = (EditText) field.get(picker);
+                    if (editText != null) {
+                        editText.setFocusable(false);      // 禁用焦点
+                        editText.setFocusableInTouchMode(false); // 禁用触摸时的焦点
+                        //editText.setEnabled(false);        // 禁用编辑功能
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

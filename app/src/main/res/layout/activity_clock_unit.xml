@@ -27,7 +27,7 @@
 
                 <TextView
                     android:id="@+id/time"
-                    android:layout_width="100dp"
+                    android:layout_width="120dp"
                     android:layout_height="50dp"
                     android:paddingLeft="5dp"
                     android:text="7:40"

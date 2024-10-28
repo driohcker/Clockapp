@@ -1,6 +1,7 @@
 package com.example.clock.MainActivity_pack;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
@@ -48,12 +50,18 @@ public class test extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        addClock.setOnClickListener(view -> {
-            Intent intent = new Intent(test.this, ClockInfo.class);
-            startActivityForResult(intent, 1);
-        });
+        addClock.setOnClickListener(new AddClockClickListener());
     }
 
+    class AddClockClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view) {
+            Intent intent = new Intent(test.this, ClockInfo.class);
+            startActivityForResult(intent, 1);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

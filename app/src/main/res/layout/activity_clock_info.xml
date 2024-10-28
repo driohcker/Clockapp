@@ -48,14 +48,16 @@
                     android:layout_weight="1"
                     android:text="闹钟设置"
                     android:textAlignment="center"
-                    android:textSize="20dp" />
+                    android:gravity="center_vertical"
+                    android:textSize="20dp"
+                    tools:ignore="RtlCompat" />
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:text="3小时40分钟16秒后响铃"
+                    android:text=""
                     android:textAlignment="center"
                     android:textSize="11sp" />
             </LinearLayout>

@@ -48,6 +48,7 @@
                 android:visibility="visible"
                 android:background="@null"
                 android:layout_marginLeft="50dp"
+                android:editable="false"
                 android:textSize="15dp"/>
 
             <Switch
@@ -78,6 +79,7 @@
                 android:visibility="visible"
                 android:background="@null"
                 android:layout_marginLeft="50dp"
+                android:editable="false"
                 android:textSize="15dp"/>
 
             <Switch

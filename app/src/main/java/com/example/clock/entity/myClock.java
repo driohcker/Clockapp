@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi;
 
 import com.example.clock.Sql.ClockDatabaseHelper;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  *  闹钟类，负责记录闹钟的相关信息
  */
-public class myClock {
+public class myClock implements Serializable {
     /**
      *  time 记录时间点（12小时制）
      *  time_remains 记录距离闹钟时间还有多少时间
@@ -52,18 +53,25 @@ public class myClock {
 
     public myClock(){}
     @RequiresApi(api = Build.VERSION_CODES.O)
+    public myClock(int time_hour, int time_minute, String time_wide){
+        this.time_hour = time_hour;     //小时数字
+        this.time_minute = time_minute; //分钟数字
+        this.time_wide = time_wide;     //上午还是下午
+        time = LocalTime.of(time_hour, time_minute);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public myClock(int time_hour, int time_minute, String time_wide, List<DayOfWeek> times, String info, Context context){
         /**
          *  初始化闹钟属性
          */
-        this.time_hour = time_hour;
-        this.time_minute = time_minute;
+        this.time_hour = time_hour;     //小时数字
+        this.time_minute = time_minute; //分钟数字
         this.time_wide = time_wide;     //上午还是下午
         this.repeat_times = times;      //频率
         this.ifuse = true;              //是否使用，初始化为是
         this.info = info;               //备注
         time = LocalTime.of(time_hour, time_minute);
-        clockDatabaseHelper = new ClockDatabaseHelper(context);
+        //clockDatabaseHelper = new ClockDatabaseHelper(context);
     }
 
     /**
@@ -76,6 +84,9 @@ public class myClock {
         this.time_hour = time_hour;
         this.time_minute = time_minute;
         time = LocalTime.of(time_hour,time_minute);
+    }
+    public void setTimeWide(String time_wide){
+        this.time_wide = time_wide;
     }
     public LocalTime getTime(){
         return this.time;
