@@ -132,13 +132,13 @@
                     android:textSize="15sp" />
 
                 <TextView
-                    android:id="@+id/textView5"
+                    android:id="@+id/repeat_times_view"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
                     android:paddingRight="8dp"
-                    android:text="周六"
+                    android:text=""
                     android:textAlignment="viewEnd"
                     android:textSize="15sp"
                     tools:ignore="RtlCompat" />
@@ -184,7 +184,7 @@
                 android:textSize="15sp"/>
 
             <EditText
-                android:id="@+id/textView9"
+                android:id="@+id/info"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

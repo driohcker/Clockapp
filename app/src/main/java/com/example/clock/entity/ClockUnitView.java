@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.NumberPicker;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -20,39 +20,41 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.clock.MainActivity_pack.ClockExtraSetting;
+import com.example.clock.MainActivity_pack.test;
 import com.example.clock.R;
 
-import java.io.Serializable;
-
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class ClockUnitView extends Fragment {
 
     private final View view;
     private final LinearLayout clockUnit;
     private final FrameLayout fragmentContainer;
     private final FragmentManager fragmentManager;
+    private final test parentActivity;
     private TextView time,time_wide,times,time_remains;
+    private Switch ifuse;
 
     private static final String TAG = "ClockUnitView";
     private boolean isExpanded = false;
 
     private myClock myclock;
 
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public ClockUnitView(Context context, FragmentManager fragmentManager, ViewGroup parent) {
+    public ClockUnitView(Context context, FragmentManager fragmentManager, ViewGroup parent, test parentActivity, myClock myclock) {
+        this.parentActivity = parentActivity;
         this.view = LayoutInflater.from(context).inflate(R.layout.activity_clock_unit, parent, false);
         this.fragmentContainer = new FrameLayout(context);
         this.fragmentContainer.setId(View.generateViewId());
 
         //这里对新建闹钟ClockInfo传来的值对myclock对象进行初始化
-        //模拟值传入
-        myclock = new myClock(11,31,"上午");
+        this.myclock = myclock;
 
         this.clockUnit = view.findViewById(R.id.clockUnit);
         time = view.findViewById(R.id.time);
         time_wide = view.findViewById(R.id.time_wide);
         times = view.findViewById(R.id.times);
         time_remains = view.findViewById(R.id.time_remains);
+        ifuse = view.findViewById(R.id.ifuse);
+
 
         ((LinearLayout) view.findViewById(R.id.clockUnit)).addView(fragmentContainer);
 
@@ -64,16 +66,18 @@ public class ClockUnitView extends Fragment {
             ((LinearLayout) parent).setLayoutTransition(new LayoutTransition());
         }
 
-        setupClickListener();//clockunit点击展开收缩
+        //clockunit点击展开收缩
+        setupClickListener();
 
         update();
     }
 
+
     public void update(){
-        //设置一个线程对他进行每秒更新
         this.time.setText(myclock.getTime().toString());
-        //this.times.setText(myclock.getRepeatTimes().toString());
+        this.times.setText(myclock.showRepeatTimes());
         this.time_wide.setText(myclock.getTimeWide());
+        this.ifuse.setChecked(myclock.getIfuse());
         //time_remains没写
     }
 
@@ -127,7 +131,7 @@ public class ClockUnitView extends Fragment {
             }
             layoutParams.height = animatedValue;
             container.setLayoutParams(layoutParams);
-            Log.d(TAG, "Updated container height: " + animatedValue);
+            //Log.d(TAG, "Updated container height: " + animatedValue);
         });
 
         animator.setDuration(300);
@@ -161,6 +165,7 @@ public class ClockUnitView extends Fragment {
         }
     }
 
+    //暂时还没有完全删除，需要完成父页面的删除才能彻底删除
     public void deleteClockUnit(){
         // 确保展开视图收起
         collapseClockUnit();
@@ -170,7 +175,11 @@ public class ClockUnitView extends Fragment {
             ((ViewGroup) view.getParent()).removeView(view);
         }
 
+        myclock.delFromDatabase();
+
         // 清空引用
         myclock = null;
+
+        parentActivity.delClockUnitView(this);
     }
 }

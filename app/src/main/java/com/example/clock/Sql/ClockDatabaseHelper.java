@@ -5,9 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.example.clock.entity.myClock;
 
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class ClockDatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "clock.db";
     private static final int DATABASE_VERSION = 1;
@@ -31,7 +35,7 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_CLOCK + " (" +
-                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_ID + " TEXT PRIMARY KEY, " +
                 COLUMN_HOUR + " INTEGER, " +
                 COLUMN_MINUTE + " INTEGER, " +
                 COLUMN_TIME_WIDE + " TEXT, " +
@@ -51,10 +55,11 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
     public long insertClock(myClock clock) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(COLUMN_ID, clock.getID());
         values.put(COLUMN_HOUR, clock.getTimeHour());
         values.put(COLUMN_MINUTE, clock.getTimeMinute());
         values.put(COLUMN_TIME_WIDE, clock.getTimeWide());
-        values.put(COLUMN_REPEAT_TIMES, clock.getRepeatTimes_String());
+        values.put(COLUMN_REPEAT_TIMES, clock.getRepeatTimes_ToString());
         values.put(COLUMN_IFUSE, clock.getIfuse());
         values.put(COLUMN_INFO, clock.getInfo());
 
@@ -68,6 +73,20 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query(TABLE_CLOCK, null, null, null, null, null, null);
     }
+    public myClock getMyClock(String id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM clock_table WHERE id = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{id});
+
+        int hour = cursor.getInt(cursor.getColumnIndexOrThrow("hour"));
+        int minute = cursor.getInt(cursor.getColumnIndexOrThrow("minute"));
+        String time_wide = cursor.getString(cursor.getColumnIndexOrThrow("time_wide"));
+        String repeat_times = cursor.getString(cursor.getColumnIndexOrThrow("repeat_times"));
+        int ifuse = cursor.getInt(cursor.getColumnIndexOrThrow("ifuse"));
+        String info = cursor.getString(cursor.getColumnIndexOrThrow("info"));
+
+        return new myClock(id, hour, minute, time_wide, repeat_times, ifuse, info);
+    }
 
     // 更新数据
     public int updateClock(myClock clock, int id) {
@@ -76,7 +95,7 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_HOUR, clock.getTimeHour());
         values.put(COLUMN_MINUTE, clock.getTimeMinute());
         values.put(COLUMN_TIME_WIDE, clock.getTimeWide());
-        values.put(COLUMN_REPEAT_TIMES, clock.getRepeatTimes_String());
+        values.put(COLUMN_REPEAT_TIMES, clock.getRepeatTimes_ToString());
         values.put(COLUMN_IFUSE, clock.getIfuse());
         values.put(COLUMN_INFO, clock.getInfo());
 

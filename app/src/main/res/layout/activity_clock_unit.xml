@@ -48,7 +48,7 @@
 
                 <TextView
                     android:id="@+id/times"
-                    android:layout_width="60dp"
+                    android:layout_width="110dp"
                     android:layout_height="match_parent"
                     android:paddingLeft="7dp"
                     android:text="每天"
@@ -56,7 +56,7 @@
 
                 <TextView
                     android:id="@+id/time_remains"
-                    android:layout_width="220dp"
+                    android:layout_width="190dp"
                     android:layout_height="match_parent"
                     android:text="3小时40分钟16秒后响铃"
                     android:textSize="14sp" />
@@ -65,6 +65,7 @@
         </LinearLayout>
 
         <Switch
+            android:id="@+id/ifuse"
             android:layout_width="55dp"
             android:layout_height="match_parent"
             android:scaleX="1.25"

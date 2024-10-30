@@ -1,6 +1,7 @@
 package com.example.clock.MainActivity_pack;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,6 +11,7 @@ import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
@@ -20,9 +22,11 @@ import androidx.fragment.app.FragmentManager;
 import com.example.clock.ClockInfo_pack.ClockInfo;
 import com.example.clock.R;
 import com.example.clock.Settings.Settings;
+import com.example.clock.entity.myClock;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.example.clock.entity.ClockUnitView;
 
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class MainActivity extends AppCompatActivity {
 
     Toolbar toolbar;
@@ -59,13 +63,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (data.getBooleanExtra("addClockUnit", false)) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                new ClockUnitView(this, fragmentManager, clockUnitContainer);
+                //new ClockUnitView(this, fragmentManager, clockUnitContainer, this, (myClock) data.getSerializableExtra("myClock"));
             }
         }
     }

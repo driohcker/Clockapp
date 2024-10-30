@@ -8,18 +8,24 @@ import androidx.annotation.RequiresApi;
 import com.example.clock.Sql.ClockDatabaseHelper;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 
 /**
  *  闹钟类，负责记录闹钟的相关信息
  */
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class myClock implements Serializable {
     /**
+     *  ID 特征码
      *  time 记录时间点（12小时制）
      *  time_remains 记录距离闹钟时间还有多少时间
      *  <<利用数据库保存>>
@@ -35,8 +41,7 @@ public class myClock implements Serializable {
      *  #ring 铃声（未实现）
      *  #vibration 是否震动（未实现）
      */
-
-
+    private String ID;
     private int time_hour,time_minute;
     private LocalTime time_clock;
     private String time_wide;
@@ -51,29 +56,42 @@ public class myClock implements Serializable {
 
     private static ClockDatabaseHelper clockDatabaseHelper;
 
-    public myClock(){}
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    public myClock(){
+        this.ifuse = true;
+        this.info = "";
+        this.time_hour = 0;
+        this.time_minute = 0;
+        this.time_wide = "上午";
+        this.repeat_times = new ArrayList<>();
+        this.time = LocalTime.of(time_hour, time_minute);
+        this.ID = getNewID();
+    }
+    /**
+     * 这里注意对每个需要用到的变量进行初始化，避免在传入值时出现空指针异常
+     */
     public myClock(int time_hour, int time_minute, String time_wide){
         this.time_hour = time_hour;     //小时数字
         this.time_minute = time_minute; //分钟数字
         this.time_wide = time_wide;     //上午还是下午
+        this.repeat_times = new ArrayList<>();
+        this.info = "";
+        this.ifuse = true;
         time = LocalTime.of(time_hour, time_minute);
     }
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public myClock(int time_hour, int time_minute, String time_wide, List<DayOfWeek> times, String info, Context context){
+    public myClock(String ID, int time_hour, int time_minute, String time_wide, String times, int ifuse, String info){
         /**
          *  初始化闹钟属性
          */
+        this.ID = ID;
         this.time_hour = time_hour;     //小时数字
         this.time_minute = time_minute; //分钟数字
         this.time_wide = time_wide;     //上午还是下午
-        this.repeat_times = times;      //频率
-        this.ifuse = true;              //是否使用，初始化为是
+        this.repeat_times = getRepeatTimes_FromString(times);      //频率
+        this.ifuse = (ifuse == 1);              //是否使用，初始化为是
         this.info = info;               //备注
         time = LocalTime.of(time_hour, time_minute);
         //clockDatabaseHelper = new ClockDatabaseHelper(context);
     }
-
     /**
      *  设置此些方法的目的是为了在闹钟扩展界面方便的修改数值
      *  set设置闹钟时间（12小时制）
@@ -116,10 +134,50 @@ public class myClock implements Serializable {
     public List<DayOfWeek> getRepeatTimes(){
         return this.repeat_times;
     }
-    public String getRepeatTimes_String() {
+    public List<DayOfWeek> getRepeatTimes_FromString(String repeat_times){
+        List<DayOfWeek> daysOfWeek = new ArrayList<>();
+        String[] dayNumbers = repeat_times.split(","); // 按逗号分割字符串
+
+        for (String dayNumber : dayNumbers) {
+            try {
+                int dayIndex = Integer.parseInt(dayNumber.trim()); // 转换为整数并去除多余空格
+                DayOfWeek dayOfWeek = DayOfWeek.of(dayIndex); // 将数字映射为 DayOfWeek 对象
+                daysOfWeek.add(dayOfWeek);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid day number: " + dayNumber); // 捕获错误
+            }
+        }
+        return daysOfWeek;
+    }
+    public String getRepeatTimes_ToString() {
         StringBuilder serialized = new StringBuilder();
         for (DayOfWeek day : repeat_times) {
-            serialized.append(day.name()).append(","); // 将每个日期以逗号分隔
+            switch (day){
+                case MONDAY:
+                    serialized.append("1");
+                    break;
+                case TUESDAY:
+                    serialized.append("2");
+                    break;
+                case WEDNESDAY:
+                    serialized.append("3");
+                    break;
+                case THURSDAY:
+                    serialized.append("4");
+                    break;
+                case FRIDAY:
+                    serialized.append("5");
+                    break;
+                case SATURDAY:
+                    serialized.append("6");
+                    break;
+                case SUNDAY:
+                    serialized.append("7");
+                    break;
+                default:
+                    break;
+            }
+            serialized.append(","); // 将每个日期以逗号分隔
         }
         if (serialized.length() > 0) {
             serialized.setLength(serialized.length() - 1); // 去掉最后一个逗号
@@ -128,6 +186,14 @@ public class myClock implements Serializable {
     }
     public void delRepeatTimes(DayOfWeek repeat_times){
         this.repeat_times.remove(repeat_times);
+    }
+    //显示优化
+    public String showRepeatTimes(){
+        // 检查是否包含所有星期
+        if (repeat_times.containsAll(Arrays.asList(DayOfWeek.values()))) {
+            return "每天";
+        }
+        return "周 " + getRepeatTimes_ToString();
     }
     /**
      *  set设置是否使用闹钟
@@ -144,7 +210,6 @@ public class myClock implements Serializable {
      *  calculate_time_clock 计算time_clock的值，将12小时制转换成24制，并作为实际存储数据
      *  caculate_remaining_time 计算距离最近的闹钟时间还有多久
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void calculateTimeClock(){
         if(this.time_wide.equals("上午")){
             this.time_clock = this.time;
@@ -154,7 +219,6 @@ public class myClock implements Serializable {
             throw new IllegalArgumentException("time_wide 的值无效");
         }
     }
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public Duration calculateRemainingTime() {
         now = LocalDateTime.now(); // 获取当前的时间和日期
         nextAlarm = null;
@@ -195,4 +259,23 @@ public class myClock implements Serializable {
         this.info = info;
     }
 
+    public void updateToDatabase(){
+        //这里编写将clock的属性更新至数据库的操作
+    }
+    public void uploadToDatabase(){
+        //这里编写将clock的属性上传至数据库的操作
+    }
+    public void delFromDatabase(){
+        //这里编写将clock的属性从数据库移除的操作
+    }
+
+    //根据当地时间生成特征码
+    private String getNewID(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String id = dateFormat.format(new Date());
+        return id;
+    }
+    public String getID(){
+        return ID;
+    }
 }

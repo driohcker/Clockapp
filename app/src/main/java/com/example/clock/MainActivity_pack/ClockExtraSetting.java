@@ -27,6 +27,7 @@ import java.lang.reflect.Field;
  * 此类用来对闹钟的简要信息进行修改并记录
  * 对应页面clock_extra_setting
  */
+@RequiresApi(api = Build.VERSION_CODES.O)
 public class ClockExtraSetting extends Fragment implements NumberPicker.OnValueChangeListener, View.OnClickListener{
 
     NumberPicker time_widePicker, hourPicker, minutePicker;
@@ -132,7 +133,6 @@ public class ClockExtraSetting extends Fragment implements NumberPicker.OnValueC
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View view) {
         //设置按钮点击
@@ -141,11 +141,11 @@ public class ClockExtraSetting extends Fragment implements NumberPicker.OnValueC
             Intent intent = new Intent();
             intent.putExtra("viewfrom", "ClockUnitView");
             intent.putExtra("myClock", clockUnitView.getMyclock());
-            Log.e("ClockExtraSetting", "已经传入clock");
-            intent.setClass(this.getContext(), ClockInfo.class);
-            startActivity(intent);
-        }
+            Log.d("ClockExtraSetting", "已经传入clock");
+            intent.setClass(requireActivity(), ClockInfo.class);
 
+            startActivityForResult(intent,1);
+        }
         //确定按钮点击
         if (view.getId() == R.id.comfirm_button) {
             //记录数值
@@ -156,8 +156,10 @@ public class ClockExtraSetting extends Fragment implements NumberPicker.OnValueC
             //收起
             clockUnitView.collapseClockUnit();
         }
+        //删除按钮点击
         if (view.getId() == R.id.delete_button) {
             clockUnitView.deleteClockUnit();
         }
     }
+
 }
