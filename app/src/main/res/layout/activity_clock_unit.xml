@@ -58,8 +58,8 @@
                     android:id="@+id/time_remains"
                     android:layout_width="190dp"
                     android:layout_height="match_parent"
-                    android:text="3小时40分钟16秒后响铃"
-                    android:textSize="14sp" />
+                    android:text=""
+                    android:textSize="13sp" />
             </LinearLayout>
 
         </LinearLayout>

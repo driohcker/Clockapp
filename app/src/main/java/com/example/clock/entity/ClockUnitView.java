@@ -5,11 +5,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Switch;
@@ -19,14 +22,19 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.clock.CountdownFinishReceiver.CountdownReceiver;
+import com.example.clock.CountdownFinishReceiver.CountdownService;
 import com.example.clock.MainActivity_pack.ClockExtraSetting;
 import com.example.clock.MainActivity_pack.test;
 import com.example.clock.R;
 
+import java.time.Duration;
+
 @RequiresApi(api = Build.VERSION_CODES.O)
-public class ClockUnitView extends Fragment {
+public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedChangeListener{
 
     private final View view;
+    private Context context;
     private final LinearLayout clockUnit;
     private final FrameLayout fragmentContainer;
     private final FragmentManager fragmentManager;
@@ -38,16 +46,33 @@ public class ClockUnitView extends Fragment {
     private boolean isExpanded = false;
 
     private myClock myclock;
+    private String ID;
 
+    private CountdownReceiver countdownReceiver;
+
+    public void onDestroy() {
+        // 注销广播接收器
+        if (countdownReceiver != null) {
+            getContext().unregisterReceiver(countdownReceiver);
+        }
+        super.onDestroy();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public ClockUnitView(Context context, FragmentManager fragmentManager, ViewGroup parent, test parentActivity, myClock myclock) {
         this.parentActivity = parentActivity;
         this.view = LayoutInflater.from(context).inflate(R.layout.activity_clock_unit, parent, false);
         this.fragmentContainer = new FrameLayout(context);
         this.fragmentContainer.setId(View.generateViewId());
-
+        this.context = context;
         //这里对新建闹钟ClockInfo传来的值对myclock对象进行初始化
         this.myclock = myclock;
+        ID = myclock.getID();
+        //将数据上传至数据库
+        this.myclock.setClockDatabaseHelper(context);
+        this.myclock.uploadToDatabase();
 
+        //获取组件
         this.clockUnit = view.findViewById(R.id.clockUnit);
         time = view.findViewById(R.id.time);
         time_wide = view.findViewById(R.id.time_wide);
@@ -67,18 +92,48 @@ public class ClockUnitView extends Fragment {
         }
 
         //clockunit点击展开收缩
-        setupClickListener();
+        this.setupClickListener();
+        ifuse.setOnCheckedChangeListener(this);
 
-        update();
+        updateShow();
+        countdownReceiver.addTimeRemainsView(time_remains);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private void setCountdownService() {
+        // 获取倒计时剩余时间（以毫秒为单位）
+        long durationMillis = myclock.getTimeRemains().toMillis();
 
-    public void update(){
+        // 启动倒计时服务
+        Intent countdownIntent = new Intent(context, CountdownService.class);
+        countdownIntent.putExtra("duration", durationMillis);
+        context.startService(countdownIntent);
+
+        // 注册广播接收器
+        countdownReceiver = countdownReceiver.getInstance();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(CountdownService.COUNTDOWN_FINISH_ACTION);
+        filter.addAction(CountdownService.COUNTDOWN_UPDATE_ACTION);
+        context.registerReceiver(countdownReceiver, filter, Context.RECEIVER_EXPORTED);
+    }
+
+    //将自身的myclock数据上传至数据库
+    public void updateToDatabase(){
+        this.myclock.updateToDatabase();
+    }
+    //把自身的myclock数据更新为数据库的数据（暂时没用）
+    public void updateFromDatabase(){
+        this.myclock.updateFromDatabse();
+    }
+    //更新显示信息
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    public void updateShow(){
         this.time.setText(myclock.getTime().toString());
         this.times.setText(myclock.showRepeatTimes());
         this.time_wide.setText(myclock.getTimeWide());
         this.ifuse.setChecked(myclock.getIfuse());
-        //time_remains没写
+
+        setCountdownService();
     }
 
     private void setupClickListener() {
@@ -98,6 +153,12 @@ public class ClockUnitView extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        myclock.setIfuse(b);
+        myclock.updateIfUseToDatabase();
     }
 
     private void expand() {
@@ -165,7 +226,7 @@ public class ClockUnitView extends Fragment {
         }
     }
 
-    //暂时还没有完全删除，需要完成父页面的删除才能彻底删除
+    //删除ClockUnitView
     public void deleteClockUnit(){
         // 确保展开视图收起
         collapseClockUnit();
@@ -175,11 +236,18 @@ public class ClockUnitView extends Fragment {
             ((ViewGroup) view.getParent()).removeView(view);
         }
 
-        myclock.delFromDatabase();
+        this.myclock.delFromDatabase();
 
         // 清空引用
         myclock = null;
 
+        countdownReceiver.removeTimeRemainsView(time_remains);
+
         parentActivity.delClockUnitView(this);
     }
+
+    public String getID(){
+        return ID;
+    }
+
 }

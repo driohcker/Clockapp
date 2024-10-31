@@ -125,6 +125,7 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
                 hourPicker.setValue(myclock.getTimeHour());
                 minutePicker.setValue(myclock.getTimeMinute());
                 info.setText(myclock.getInfo());
+                repeatTimes.setText("周 " + myclock.getRepeatTimes_ToString());
 
                 // 初始化值,避免两方数据不同步
                 time_wide = time_widePicker.getValue();
@@ -199,14 +200,19 @@ public class ClockInfo extends AppCompatActivity implements NumberPicker.OnValue
                 intent.putExtra("myClock",getNewMyclock());
                 setResult(RESULT_OK, intent);
 
-                //这里编写调用myClock的uploadToDatabase方法将数据上传至数据库
+                //这里编写调用myClock的uploadToDatabase方法将数据上传至数据库(已废弃，已改至ClockUnitView创建时自动创建)
             }
             if("ClockUnitView".equals(viewFrom)){
                 Intent intent1 = new Intent(view.getContext(), test.class);
                 intent1.putExtra("setClockUnit", true); // 可以根据需要传递其他数据
+                intent1.putExtra("myClockID", myclock.getID());
                 setResult(RESULT_OK, intent1);
 
                 //这里编写调用myClock的updateToDatabase方法将数据库的数据进行更新
+                myclock.setTime(hour,minute);
+                myclock.setInfo(String.valueOf(info.getText()));
+                myclock.setTimeWide(values[time_wide]);
+                myclock.updateToDatabase();
             }
             finish();
         }

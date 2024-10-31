@@ -13,6 +13,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Clock"
         tools:targetApi="31">
+
+        <!-- 注册 CountdownService -->
+        <service
+            android:name=".CountdownFinishReceiver.CountdownService"
+            android:exported="true" />
+        <receiver
+            android:name=".CountdownFinishReceiver.CountdownReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.clock.COUNTDOWN_FINISH_ACTION" />
+                <action android:name="com.example.clock.COUNTDOWN_UPDATE_ACTION" />
+            </intent-filter>
+        </receiver>
+
+        <activity android:name=".CountdownFinishReceiver.CountdownFinished" />
         <activity android:name=".ClockInfo_pack.ClockInfo" />
         <activity android:name=".Settings.Settings" />
         <activity
@@ -20,10 +35,8 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

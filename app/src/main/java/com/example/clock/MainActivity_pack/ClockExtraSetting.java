@@ -20,7 +20,6 @@ import com.example.clock.ClockInfo_pack.ClockInfo;
 import com.example.clock.R;
 import com.example.clock.entity.ClockUnitView;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
@@ -152,7 +151,8 @@ public class ClockExtraSetting extends Fragment implements NumberPicker.OnValueC
             clockUnitView.getMyclock().setTime(hour, minute);
             clockUnitView.getMyclock().setTimeWide(values[time_wide]);
             //调用更新方法
-            clockUnitView.update();
+            clockUnitView.updateToDatabase();
+            clockUnitView.updateShow();
             //收起
             clockUnitView.collapseClockUnit();
         }

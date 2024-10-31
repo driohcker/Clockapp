@@ -6,10 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
 import com.example.clock.entity.myClock;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class ClockDatabaseHelper extends SQLiteOpenHelper {
@@ -28,12 +32,27 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_IFUSE = "ifuse";
     private static final String COLUMN_INFO = "info";
 
-    public ClockDatabaseHelper(Context context) {
+    private static ClockDatabaseHelper instance;
+
+    private static String TAG = "CLockDatabaseHelper";
+    //单例模式
+    public static synchronized ClockDatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            Log.d(TAG,"无本地数据库，已创建数据库:" + TAG);
+            instance = new ClockDatabaseHelper(context.getApplicationContext());
+        }else{
+            Log.d(TAG,"已存在本地数据库，使用本地数据库" + TAG);
+        }
+        return instance;
+    }
+
+    private ClockDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d(TAG,"创建了数据库表:" + TABLE_CLOCK);
         String createTable = "CREATE TABLE " + TABLE_CLOCK + " (" +
                 COLUMN_ID + " TEXT PRIMARY KEY, " +
                 COLUMN_HOUR + " INTEGER, " +
@@ -52,7 +71,7 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 插入数据
-    public long insertClock(myClock clock) {
+    public void insertClock(myClock clock) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, clock.getID());
@@ -63,33 +82,68 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_IFUSE, clock.getIfuse());
         values.put(COLUMN_INFO, clock.getInfo());
 
-        long id = db.insert(TABLE_CLOCK, null, values);
+        db.insertWithOnConflict(TABLE_CLOCK, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        Log.d(TAG,"已添加myclock对象:" + clock.getID());
         db.close();
-        return id;
     }
 
-    // 查询数据
-    public Cursor getAllClocks() {
+    public List<myClock> getAllClocksAsList() {
+        List<myClock> clocks = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.query(TABLE_CLOCK, null, null, null, null, null, null);
+
+        // 查询所有行
+        Cursor cursor = db.query(TABLE_CLOCK, null, null, null, null, null, null);
+
+        // 遍历结果集，将每行转换为 myClock 对象并添加到列表中
+        if (cursor.moveToFirst()) {
+            do {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                int hour = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_HOUR));
+                int minute = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MINUTE));
+                String timeWide = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME_WIDE));
+                String repeatTimes = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REPEAT_TIMES));
+                int ifUse = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IFUSE));
+                String info = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_INFO));
+
+                // 创建 myClock 对象并添加到列表
+                myClock clock = new myClock(id, hour, minute, timeWide, repeatTimes, ifUse, info);
+                Log.d(TAG,"已获取myclock对象:" + id);
+                clocks.add(clock);
+            } while (cursor.moveToNext());
+        }
+
+        // 关闭 cursor 和数据库连接
+        cursor.close();
+        db.close();
+
+        return clocks;
     }
-    public myClock getMyClock(String id){
+
+    public myClock getMyClock(String id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM clock_table WHERE id = ?";
+        String query = "SELECT * FROM " + TABLE_CLOCK + " WHERE " + COLUMN_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{id});
 
-        int hour = cursor.getInt(cursor.getColumnIndexOrThrow("hour"));
-        int minute = cursor.getInt(cursor.getColumnIndexOrThrow("minute"));
-        String time_wide = cursor.getString(cursor.getColumnIndexOrThrow("time_wide"));
-        String repeat_times = cursor.getString(cursor.getColumnIndexOrThrow("repeat_times"));
-        int ifuse = cursor.getInt(cursor.getColumnIndexOrThrow("ifuse"));
-        String info = cursor.getString(cursor.getColumnIndexOrThrow("info"));
+        myClock clock = null; // 初始化为 null
+        if (cursor != null && cursor.moveToFirst()) { // 确保 Cursor 不为 null 且移动到第一条记录
+            int hour = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_HOUR));
+            int minute = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MINUTE));
+            String time_wide = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TIME_WIDE));
+            String repeat_times = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REPEAT_TIMES));
+            int ifuse = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IFUSE));
+            String info = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_INFO));
 
-        return new myClock(id, hour, minute, time_wide, repeat_times, ifuse, info);
+            // 创建 myClock 对象
+            clock = new myClock(id, hour, minute, time_wide, repeat_times, ifuse, info);
+        }
+
+        cursor.close(); // 确保关闭 Cursor
+        return clock; // 返回 myClock 对象（可能为 null）
     }
 
+
     // 更新数据
-    public int updateClock(myClock clock, int id) {
+    public void updateClock(myClock clock, String id) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_HOUR, clock.getTimeHour());
@@ -99,13 +153,31 @@ public class ClockDatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_IFUSE, clock.getIfuse());
         values.put(COLUMN_INFO, clock.getInfo());
 
-        return db.update(TABLE_CLOCK, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
+        db.update(TABLE_CLOCK, values, COLUMN_ID + " = ?", new String[]{id});
+        Log.d(TAG,"已更新myclock对象:" + id);
+        db.close();
     }
 
-    // 删除数据
-    public void deleteClock(long id) {
+    // 更新 myClock 的 ifuse 属性
+    public void updateClockIfuse(String id, boolean ifuse) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CLOCK, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
+        ContentValues values = new ContentValues();
+
+        // 将布尔值转换为整数（SQLite不支持布尔类型）
+        values.put(COLUMN_IFUSE, ifuse ? 1 : 0);
+
+        // 执行更新操作
+        db.update(TABLE_CLOCK, values, COLUMN_ID + " = ?", new String[]{id});
+        Log.d(TAG,"已更新myclock对象:" + id + " ifuse属性为：" + ifuse);
+        db.close();
+    }
+
+
+    // 删除数据
+    public void deleteClock(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CLOCK, COLUMN_ID + " = ?", new String[]{id});
+        Log.d(TAG,"已删除myclock对象:" + id);
         db.close();
     }
 }
