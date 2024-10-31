@@ -49,6 +49,7 @@ public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedC
     private String ID;
 
     private CountdownReceiver countdownReceiver;
+    Intent countdownIntent;
 
     public void onDestroy() {
         // 注销广播接收器
@@ -96,6 +97,7 @@ public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedC
         ifuse.setOnCheckedChangeListener(this);
 
         updateShow();
+        setCountdownService();
         countdownReceiver.addTimeRemainsView(time_remains);
     }
 
@@ -105,11 +107,11 @@ public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedC
         long durationMillis = myclock.getTimeRemains().toMillis();
 
         // 启动倒计时服务
-        Intent countdownIntent = new Intent(context, CountdownService.class);
+        countdownIntent = new Intent(context, CountdownService.class);
         countdownIntent.putExtra("duration", durationMillis);
         context.startService(countdownIntent);
 
-        // 注册广播接收器
+        // 注册广播接收器,注意filter不会判断是否增加的是否是重复的Action
         countdownReceiver = countdownReceiver.getInstance();
         IntentFilter filter = new IntentFilter();
         filter.addAction(CountdownService.COUNTDOWN_FINISH_ACTION);
@@ -132,8 +134,6 @@ public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedC
         this.times.setText(myclock.showRepeatTimes());
         this.time_wide.setText(myclock.getTimeWide());
         this.ifuse.setChecked(myclock.getIfuse());
-
-        setCountdownService();
     }
 
     private void setupClickListener() {
@@ -242,6 +242,7 @@ public class ClockUnitView extends Fragment implements CompoundButton.OnCheckedC
         myclock = null;
 
         countdownReceiver.removeTimeRemainsView(time_remains);
+        context.stopService(countdownIntent);
 
         parentActivity.delClockUnitView(this);
     }

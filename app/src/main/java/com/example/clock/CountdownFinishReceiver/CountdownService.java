@@ -23,7 +23,7 @@ public class CountdownService extends Service {
             @Override
             public void onTick(long millisUntilFinished) {
                 // 发送剩余时间的更新广播
-                //Log.e("onTick广播", "已更新");
+                Log.e("onTick广播", "已更新");
                 Intent updateIntent = new Intent(COUNTDOWN_UPDATE_ACTION);
                 updateIntent.putExtra("time_remaining", millisUntilFinished);
                 sendBroadcast(updateIntent);
